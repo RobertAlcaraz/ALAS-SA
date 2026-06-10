@@ -1,0 +1,335 @@
+/* ==========================================================================
+   1. RESET Y CONFIGURACIÓN GENERAL
+   ========================================================================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    display: table;
+    width: 100%;
+    height: 100vh;
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.sidebar {
+    display: table-cell;
+    width: 260px;
+    background-color: #0f172a;
+    color: #f8fafc;
+    vertical-align: top;
+    padding: 24px;
+}
+
+.main-content {
+    display: table-cell;
+    vertical-align: top;
+    padding: 40px;
+}
+
+/* ==========================================================================
+   2. BARRA LATERAL (SIDEBAR)
+   ========================================================================== */
+.sidebar-logo {
+    margin-bottom: 40px;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 15px;
+}
+
+.sidebar-logo h2 {
+    font-size: 22px;
+    color: #38bdf8;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-logo span {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.sidebar-nav {
+    display: block;
+}
+
+.nav-link {
+    display: block;
+    color: #cbd5e1;
+    padding: 14px 16px;
+    text-decoration: none;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: #1e293b;
+    color: #f8fafc;
+    padding-left: 20px;
+}
+
+.nav-link.active {
+    background-color: #0284c7;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   3. CABECERA PRINCIPAL (HEADER)
+   ========================================================================== */
+.main-header {
+    margin-bottom: 35px;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 20px;
+}
+
+.main-header h1 {
+    font-size: 26px;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.header-title p {
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.user-profile {
+    float: right;
+    margin-top: -45px;
+    background-color: #e2e8f0;
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+.user-role {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* ==========================================================================
+   4. TARJETAS Y CONTENEDORES (CARDS)
+   ========================================================================== */
+.card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    margin-bottom: 25px;
+}
+
+.card-header {
+    margin-bottom: 25px;
+}
+
+.card-header h2 {
+    font-size: 20px;
+    color: #1e293b;
+    margin-bottom: 6px;
+}
+
+.card-header p {
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* ==========================================================================
+   5. FORMULARIOS Y ESTRUCTURAS DE ENTRADA
+   ========================================================================== */
+.logistic-form {
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.form-group-col {
+    display: inline-block;
+    width: 48%;
+    margin-right: 3%;
+    vertical-align: top;
+}
+
+.form-row .form-group-col:last-child {
+    margin-right: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #334155;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1e293b;
+    background-color: #f8fafc;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #0284c7;
+    background-color: #ffffff;
+}
+
+.search-box {
+    margin-bottom: 25px;
+}
+
+.search-box input {
+    display: inline-block;
+    width: 350px;
+    margin-right: 10px;
+}
+
+/* ==========================================================================
+   6. TABLAS DE DATOS
+   ========================================================================== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background-color: #ffffff;
+}
+
+.data-table th, .data-table td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+.data-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   7. BOTONES Y COMPONENTES VISUALES (BADGES / KPIS)
+   ========================================================================== */
+.form-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-right: 10px;
+}
+
+.btn-primary { background-color: #0284c7; color: #ffffff; }
+.btn-primary:hover { background-color: #0369a1; }
+.btn-secondary { background-color: #e2e8f0; color: #475569; }
+.btn-secondary:hover { background-color: #cbd5e1; }
+
+.btn-sm {
+    padding: 6px 12px;
+    background-color: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #334155;
+}
+.btn-sm:hover { background-color: #cbd5e1; }
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-block;
+}
+.badge-transit { background-color: #e0f2fe; color: #0369a1; }
+.badge-route { background-color: #fef9c3; color: #a16207; }
+.badge-success { background-color: #dcfce7; color: #15803d; }
+
+/* Módulo Rutas Dividido */
+.modules-split {
+    width: 100%;
+}
+.split-left {
+    display: inline-block;
+    width: 48%;
+    vertical-align: top;
+    margin-right: 3%;
+}
+.split-right {
+    display: inline-block;
+    width: 48%;
+    vertical-align: top;
+}
+.route-item {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+.route-warning { border-left: 4px solid #eab308; background: #fef08a; }
+.route-success { border-left: 4px solid #22c55e; background: #dcfce7; }
+
+/* KPIs del Módulo de Reportes */
+.kpi-container {
+    width: 100%;
+    margin-bottom: 30px;
+}
+.kpi-card {
+    display: inline-block;
+    width: 31%;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-right: 2%;
+    vertical-align: top;
+}
+.kpi-card:last-child { margin-right: 0; }
+.kpi-card h3 { font-size: 28px; margin-bottom: 5px; }
+.kpi-card p { font-size: 13px; opacity: 0.9; }
+
+.bg-blue { background-color: #0284c7; }
+.bg-green { background-color: #22c55e; }
+.bg-red { background-color: #ef4444; }
+
+.audit-notice {
+    background: #f8fafc;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+.audit-notice h4 { margin-bottom: 8px; }
+
+/* Estados globales de texto */
+.text-success { color: #22c55e; font-weight: bold; }
+
+/* Utilidad fundamental para la navegación */
+.style-hidden {
+    display: none !important;
+}
