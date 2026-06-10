@@ -9,8 +9,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         .map-container { width: 100%; height: 350px; margin-top: 20px; border-radius: 8px; border: 1px solid #cbd5e1; z-index: 1; }
-        .geo-btn { background-color: #10b981; color: white; }
-        .geo-btn:hover { background-color: #059669; }
         .login-wrapper { display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; background-color: #0f172a; position: fixed; top: 0; left: 0; z-index: 9999; }
         .login-box { background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
         .login-box h2 { margin-bottom: 5px; color: #0f172a; text-align: center; }
@@ -19,16 +17,27 @@
         .btn-logout { background-color: #ef4444; color: white; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; border: none; font-weight: bold; }
         .btn-logout:hover { background-color: #dc2626; }
         
-        /* Estilos para las tarjetas de aprobación de pedidos web */
         .web-order-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px; margin-bottom: 15px; }
-        .web-order-card strong { color: #0f172a; }
         .btn-approve { background-color: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; margin-top: 10px; }
         .btn-approve:hover { background-color: #1d4ed8; }
+
+        .driver-panel-box { background-color: #f8fafc; border: 2px dashed #3b82f6; border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 25px; }
+        .btn-gps-toggle { background-color: #10b981; color: white; border: none; padding: 15px 30px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4); transition: 0.2s; }
+        .btn-gps-toggle:hover { background-color: #059669; transform: translateY(-1px); }
+        .btn-gps-active { background-color: #ef4444; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.4); }
+        .btn-gps-active:hover { background-color: #dc2626; }
+        .gps-status { font-weight: bold; margin-top: 10px; color: #64748b; }
+        .gps-on { color: #10b981; }
+
+        /* Nuevos estilos para alertas de verificación */
+        .badge-driver-delivered { background-color: #fef08a; color: #a16207; font-weight: bold; animation: pulse 2s infinite; }
+        .btn-verify { background-color: #d97706; color: white; }
+        .btn-verify:hover { background-color: #b45309; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA DE LOGIN -->
     <div id="pantalla-login" class="login-wrapper">
         <div class="login-box">
             <h2>ALAS S.A.</h2>
@@ -48,7 +57,6 @@
         </div>
     </div>
 
-    <!-- BARRA LATERAL -->
     <aside class="sidebar">
         <div class="sidebar-logo">
             <h2>ALAS S.A.</h2>
@@ -58,12 +66,13 @@
             <a href="#" id="btn-registro" class="nav-link active" onclick="cambiarModulo('modulo-registro', this)">📦 Registro de Envíos</a>
             <a href="#" id="btn-seguimiento" class="nav-link" onclick="cambiarModulo('modulo-seguimiento', this)">📍 Seguimiento en Vivo</a>
             <a href="#" id="btn-rutas" class="nav-link" onclick="cambiarModulo('modulo-rutas', this)">🗺️ Optimización de Rutas</a>
+            <a href="#" id="btn-choferes" class="nav-link" style="background-color: #1e293b; border-left: 4px solid #3b82f6;" onclick="cambiarModulo('modulo-choferes', this)">🚚 App de Choferes (Móvil)</a>
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
             <a href="#" id="btn-reportes" class="nav-link" onclick="cambiarModulo('modulo-reportes', this)">📊 Reportes Gerenciales</a>
             <a href="#" id="btn-usuarios" class="nav-link" onclick="cambiarModulo('modulo-usuarios', this)">👥 Control de Usuarios</a>
         </nav>
     </aside>
 
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content">
         <header class="main-header">
             <div class="header-title">
@@ -77,10 +86,8 @@
             </div>
         </header>
 
-        <!-- MÓDULO 1: REGISTRO Y APROBACIÓN DE ENVÍOS -->
         <section id="modulo-registro" class="card content-section">
             <div class="modules-split" style="gap: 30px;">
-                <!-- COLUMNA IZQUIERDA: REGISTRO MANUAL -->
                 <div class="split-left">
                     <div class="card-header" style="padding-left:0;">
                         <h2>Nuevo Registro Presencial</h2>
@@ -113,34 +120,26 @@
                                 <input type="number" id="peso" step="0.1" required>
                             </div>
                         </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary" style="width:100%;">Registrar Envío</button>
-                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%;">Registrar Envío</button>
                     </form>
                 </div>
-
-                <!-- COLUMNA DERECHA: APARTADO DE PEDIDOS WEB CARGADOS POR EL CLIENTE -->
                 <div class="split-right" style="border-left: 1px solid #e2e8f0; padding-left: 20px;">
                     <div class="card-header" style="padding-left:0;">
                         <h2>📥 Solicitudes Web Pendientes</h2>
                         <p>Valide los paquetes entregados por clientes antes de admitirlos en el sistema móvil.</p>
                     </div>
-                    <div id="contenedor-pedidos-web">
-                        <!-- Aquí caen los pedidos automáticos del cliente.html -->
-                    </div>
+                    <div id="contenedor-pedidos-web"></div>
                 </div>
             </div>
         </section>
 
-        <!-- MÓDULO 2: SEGUIMIENTO EN VIVO -->
         <section id="modulo-seguimiento" class="card content-section style-hidden">
             <div class="card-header">
                 <h2>📍 Trazabilidad y Seguimiento de Paquetes</h2>
-                <p>Monitoreo en tiempo real para evitar la pérdida de información y reclamos de clientes.</p>
+                <p>Monitoreo en tiempo real. Revise y autorice los cierres informados por los choferes.</p>
             </div>
             <div class="search-box">
                 <input type="text" id="input-busqueda" oninput="filtrarTabla()" placeholder="🔍 Buscar por Código...">
-                <button class="btn geo-btn" onclick="obtenerUbicacionActual()">📡 Simular Mi Ubicación como Chofer</button>
             </div>
             <div id="mapa-seguimiento" class="map-container"></div>
             <table class="data-table" style="margin-top: 25px;">
@@ -152,18 +151,16 @@
                         <th>Destino</th>
                         <th>Última Actualización</th>
                         <th>Estado Actual</th>
-                        <th>Acción</th>
+                        <th>Acción Administrativa</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-seguimiento-body"></tbody>
             </table>
         </section>
 
-        <!-- MÓDULO 3: OPTIMIZACIÓN DE RUTAS -->
         <section id="modulo-rutas" class="card content-section style-hidden">
             <div class="card-header">
                 <h2>🗺️ Planificación y Optimización de Rutas</h2>
-                <p>Sustitución definitiva de las hojas de cálculo manuales para coordinar choferes.</p>
             </div>
             <div class="modules-split">
                 <div class="split-left">
@@ -184,9 +181,9 @@
                         <div class="form-group">
                             <label for="zona">Zona / Ruta Asignada</label>
                             <select id="zona">
-                                <option value="Ruta 1 - Sector Centro">Ruta 1 - Sector Centro Financiero</option>
-                                <option value="Ruta 2 - Sector Norte">Ruta 2 - Sector Norte Residencial</option>
-                                <option value="Ruta 3 - Interprovinciales">Ruta 3 - Envíos Interprovinciales</option>
+                                <option value="Sector Centro">Sector Centro Financiero</option>
+                                <option value="Sector Norte">Sector Norte Residencial</option>
+                                <option value="Sector Este">Sector Este Comercial</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">Generar Hoja de Ruta Digital</button>
@@ -199,34 +196,50 @@
             </div>
         </section>
 
-        <!-- MÓDULO 4: REPORTES GERENCIALES -->
-        <section id="modulo-reportes" class="card content-section style-hidden">
+        <section id="modulo-choferes" class="card content-section style-hidden">
             <div class="card-header">
-                <h2>📊 Consolidado de Información Operativa</h2>
-                <p>Métricas claves (KPIs) en tiempo real para que la gerencia tome decisiones informadas.</p>
+                <h2>🚚 Terminal Móvil del Distribuidor</h2>
+                <p>Simulador para el chofer **Carlos Mendoza**.</p>
             </div>
+
+            <div class="driver-panel-box">
+                <h3 style="margin-bottom: 10px; color:#0f172a;">Panel de Localización Satelital (GPS)</h3>
+                <button id="btn-gps" class="btn-gps-toggle" onclick="toggleGPSChofer()">
+                    <span>📡</span> <span id="text-btn-gps">Activar Mi Ubicación de Ruta</span>
+                </button>
+                <div id="status-gps" class="gps-status">Estado: 🔴 GPS Desconectado</div>
+            </div>
+
+            <h3 style="color:#0f172a; margin-bottom: 15px;">📋 Mi Hoja de Ruta Asignada Hoy (Carlos Mendoza)</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Destinatario</th>
+                        <th>Dirección de Entrega</th>
+                        <th>Carga</th>
+                        <th>Acción de Calle</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-chofer-body"></tbody>
+            </table>
+        </section>
+
+        <section id="modulo-reportes" class="card content-section style-hidden">
+            <div class="card-header"><h2>📊 Consolidado de Información Operativa</h2></div>
             <div class="kpi-container">
                 <div class="kpi-card bg-blue"><h3 id="kpi-procesados">0</h3><p>Paquetes Procesados</p></div>
                 <div class="kpi-card bg-green"><h3 id="kpi-eficiencia">100%</h3><p>Eficiencia de Entrega</p></div>
                 <div class="kpi-card bg-red"><h3 id="kpi-transit">0</h3><p>En Tránsito / Reparto</p></div>
             </div>
-            <div class="audit-notice">
-                <h4>📉 Alerta de Auditoría Interna</h4>
-                <p>Al integrar las sucursales, el volumen de registros duplicados cayó a 0% esta semana.</p>
-            </div>
         </section>
 
-        <!-- MÓDULO 5: CONTROL DE USUARIOS -->
         <section id="modulo-usuarios" class="card content-section style-hidden">
-            <div class="card-header">
-                <h2>👥 Administración de Personal y Roles</h2>
-            </div>
+            <div class="card-header"><h2>👥 Administración de Personal y Roles</h2></div>
             <table class="data-table">
-                <thead>
-                    <tr><th>Nombre Completo</th><th>Área</th><th>Rol Asignado</th><th>Estado</th></tr>
-                </thead>
+                <thead><tr><th>Nombre Completo</th><th>Área</th><th>Rol Assigned</th><th>Estado</th></tr></thead>
                 <tbody>
-                    <tr><td>Raúl Benítez</td><td>Atención al Cliente</td><td><strong>Soporte</strong></td><td><span class="text-success">✔ Activo</span></td></tr>
+                    <tr><td>Carlos Mendoza</td><td>Distribución Física</td><td><strong>Chofer Principal</strong></td><td><span class="text-success">✔ En Ruta</span></td></tr>
                     <tr><td>Clara Insfrán</td><td>Administración Gerencial</td><td><strong>Administrador</strong></td><td><span class="text-success">✔ Activo</span></td></tr>
                 </tbody>
             </table>
@@ -236,15 +249,13 @@
     <script>
         let map;
         let choferMarker;
+        let watchID = null;
 
         let envios = JSON.parse(localStorage.getItem('ALAS_ENVIOS')) || [
-            { id: "#TRK-9823", cliente: "Juan Pérez", producto: "Componentes de motor", destino: "Av. Mariscal López 2450", ubicacion: "Sucursal Norte", estado: "En Tránsito" },
-            { id: "#TRK-9824", cliente: "RobShop Store", producto: "Lote de Ropa", destino: "Calle Palma 412", ubicacion: "Asignado a unidad móvil de reparto", estado: "En Reparto" }
+            { id: "#TRK-9823", cliente: "Juan Pérez", producto: "Componentes de motor", destino: "Av. Mariscal López 2450", ubicacion: "Sucursal Norte", estado: "En Tránsito" }
         ];
 
-        let rutasActivas = JSON.parse(localStorage.getItem('ALAS_RUTAS')) || [
-            { chofer: "Marcos Benítez", zona: "Ruta 1 - Sector Centro", paquete: "#TRK-9824", producto: "Lote de Ropa" }
-        ];
+        let rutasActivas = JSON.parse(localStorage.getItem('ALAS_RUTAS')) || [];
 
         document.addEventListener("DOMContentLoaded", () => {
             if (sessionStorage.getItem('ALAS_SESION_ACTIVA') === 'true') {
@@ -281,47 +292,36 @@
             document.getElementById(idModulo).classList.remove('style-hidden');
             botonActivo.classList.add('active');
 
-            if (idModulo === 'modulo-seguimiento') setTimeout(inicializarMapa, 200);
+            if (idModulo === 'modulo-seguimiento') {
+                setTimeout(() => {
+                    inicializarMapa();
+                    chequearYRenderizarMarcadorGPS();
+                }, 200);
+            }
             actualizarTodo();
         }
 
-        // RENDERIZAR PEDIDOS WEB EN EL APARTADO DE REGISTRO
         function renderPedidosWebPendientes() {
             const contenedor = document.getElementById('contenedor-pedidos-web');
-            if(!contenedor) return;
-            contenedor.innerHTML = "";
-
-            // Filtrar únicamente los cargados desde la web que no han sido admitidos
+            if(!contenedor) return; contenedor.innerHTML = "";
             const pendientesWeb = envios.filter(e => e.estado === "Pendiente de Aprobación");
-
             if(pendientesWeb.length === 0) {
-                contenedor.innerHTML = "<p style='color:gray; font-size:14px; margin-top:15px;'>No hay solicitudes web pendientes de validación.</p>";
+                contenedor.innerHTML = "<p style='color:gray; font-size:14px; margin-top:15px;'>No hay solicitudes pendientes.</p>";
                 return;
             }
-
             pendientesWeb.forEach(p => {
-                const div = document.createElement('div');
-                div.className = "web-order-card";
-                div.innerHTML = `
-                    <strong>Código:</strong> ${p.id}<br>
-                    <strong>Cliente:</strong> ${p.cliente}<br>
-                    <strong>Producto:</strong> ${p.producto}<br>
-                    <strong>Destino:</strong> ${p.destino}<br>
-                    <button class="btn-approve" onclick="confirmarPedidoWeb('${p.id}')">✔ Confirmar y Recibir Paquete</button>
-                `;
+                const div = document.createElement('div'); div.className = "web-order-card";
+                div.innerHTML = `<strong>Código:</strong> ${p.id}<br><strong>Cliente:</strong> ${p.cliente}<br><strong>Producto:</strong> ${p.producto}<br><button class="btn-approve" onclick="confirmarPedidoWeb('${p.id}')">✔ Confirmar y Recibir</button>`;
                 contenedor.appendChild(div);
             });
         }
 
-        // ACCIÓN DEL ADMINISTRADOR: APROBAR EL ENVÍO WEB
         function confirmarPedidoWeb(id) {
             const paquete = envios.find(e => e.id === id);
             if(paquete) {
-                paquete.estado = "En Tránsito"; // Cambia al flujo oficial de la empresa
+                paquete.estado = "En Tránsito";
                 paquete.ubicacion = "Recibido en planta central. Listo para distribución.";
-                guardarDatos();
-                actualizarTodo();
-                alert(`📦 El paquete ${id} ha sido aprobado e ingresado formalmente al sistema logístico.`);
+                guardarDatos(); actualizarTodo();
             }
         }
 
@@ -336,44 +336,74 @@
                 ubicacion: "Registrado en " + document.getElementById('sucursal').value,
                 estado: "En Tránsito"
             });
-            guardarDatos();
-            actualizarTodo();
-            alert(`✅ Registrado con éxito: ${nuevoId}`);
+            guardarDatos(); actualizarTodo();
             document.getElementById('form-registro').reset();
+            alert(`✅ Registrado con éxito: ${nuevoId}`);
         }
 
+        // CONTROL DE AVANCE OPERATIVO DESDE PANEL ADMIN
         function cambiarEstadoPaquete(id) {
             const paquete = envios.find(e => e.id === id);
             if(paquete) {
                 if(paquete.estado === "En Tránsito") {
                     paquete.estado = "En Reparto";
                     paquete.ubicacion = "Asignado a unidad móvil de reparto";
-                } else if(paquete.estado === "En Reparto") {
-                    paquete.estado = "Entregado";
-                    paquete.ubicacion = "Entregado en destino conforme";
-                    rutasActivas = rutasActivas.filter(r => r.paquete !== id);
                 }
-                guardarDatos();
-                actualizarTodo();
+                guardarDatos(); actualizarTodo();
             }
         }
 
+        // ACCIÓN CLAVE: CIERRE Y VERIFICACIÓN GERENCIAL FINALES
+        function finalizarPedidoAdministracion(id) {
+            const paquete = envios.find(e => e.id === id);
+            if(paquete) {
+                paquete.estado = "Entregado";
+                paquete.ubicacion = "Recibido en destino conforme y verificado por administración.";
+                // Remueve de las rutas activas de choferes
+                rutasActivas = rutasActivas.filter(r => r.paquete !== id);
+                guardarDatos(); actualizarTodo();
+                alert(`🎉 Pedido ${id} finalizado y auditado con éxito.`);
+            }
+        }
+
+        // RENDEREZADO DE LA TABLA EN VIVO DE OFICINA
         function renderTablaSeguimiento() {
             const tbody = document.getElementById('tabla-seguimiento-body');
-            if(!tbody) return;
-            tbody.innerHTML = "";
-
-            // Ocultar los "Pendientes" de la tabla principal de operaciones para no mezclar
+            if(!tbody) return; tbody.innerHTML = "";
+            
             const admitidos = envios.filter(e => e.estado !== "Pendiente de Aprobación");
-
+            
             admitidos.forEach(envio => {
-                let badgeClass = envio.estado === "En Reparto" ? "badge-route" : (envio.estado === "Entregado" ? "badge-success" : "badge-transit");
+                let badgeClass = "badge-transit";
+                let botonAccion = "";
+
+                if (envio.state === "En Tránsito") badgeClass = "badge-transit";
+                
+                if (envio.estado === "En Reparto") {
+                    badgeClass = "badge-route";
+                    botonAccion = `<button class="btn-sm" onclick="cambiarEstadoPaquete('${envio.id}')">Avanzar</button>`;
+                }
+                
+                // NUEVO FLUJO: Si el chofer notificó pero falta la firma de oficina
+                if (envio.estado === "Entregado por Chofer") {
+                    badgeClass = "badge-driver-delivered";
+                    botonAccion = `<button class="btn-sm btn-verify" onclick="finalizarPedidoAdministracion('${envio.id}')">✔ Verificar y Finalizar</button>`;
+                }
+                
+                if (envio.estado === "Entregado") {
+                    badgeClass = "badge-success";
+                    botonAccion = `<small style="color:gray">🔒 Concluido e Indexado</small>`;
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><strong>${envio.id}</strong></td>
-                    <td>${envio.cliente}</td><td>${envio.producto}</td><td>${envio.destino}</td>
-                    <td>${envio.ubicacion}</td><td><span class="badge ${badgeClass}">${envio.estado}</span></td>
-                    <td>${envio.estado !== 'Entregado' ? `<button class="btn-sm" onclick="cambiarEstadoPaquete('${envio.id}')">Avanzar Estado</button>` : `<small style="color:gray">Finalizado</small>`}</td>
+                    <td>${envio.cliente}</td>
+                    <td>${envio.producto}</td>
+                    <td>${envio.destino}</td>
+                    <td>${envio.ubicacion}</td>
+                    <td><span class="badge ${badgeClass}">${envio.estado}</span></td>
+                    <td>${botonAccion}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -381,8 +411,7 @@
 
         function renderSelectRutas() {
             const select = document.getElementById('select-paquete-ruta');
-            if(!select) return;
-            select.innerHTML = "";
+            if(!select) return; select.innerHTML = "";
             const admitidosPendientes = envios.filter(e => e.estado === "En Tránsito" && !rutasActivas.some(r => r.paquete === e.id));
             if(admitidosPendientes.length === 0) { select.innerHTML = "<option value=''>No hay paquetes para asignar</option>"; return; }
             admitidosPendientes.forEach(p => {
@@ -395,10 +424,14 @@
             const pId = document.getElementById('select-paquete-ruta').value;
             if(!pId) return;
             const paquete = envios.find(e => e.id === pId);
+            const choferSeleccionado = document.getElementById('chofer').value.split(" (")[0];
+            
             paquete.estado = "En Reparto";
-            paquete.ubicacion = `En reparto con chofer ${document.getElementById('chofer').value} hacia ${document.getElementById('zona').value}`;
-            rutasActivas.push({ chofer: document.getElementById('chofer').value, zona: document.getElementById('zona').value, paquete: pId, producto: paquete.producto });
+            paquete.ubicacion = `En reparto con chofer ${choferSeleccionado}`;
+            
+            rutasActivas.push({ chofer: choferSeleccionado, zona: document.getElementById('zona').value, paquete: pId, producto: paquete.producto });
             guardarDatos(); actualizarTodo();
+            alert(`🗺️ Hoja de ruta digital creada para ${choferSeleccionado}`);
         }
 
         function renderRutasActivas() {
@@ -407,16 +440,116 @@
             if(rutasActivas.length === 0) { contenedor.innerHTML = "<p style='color:gray; font-size:14px;'>No hay unidades en calle.</p>"; return; }
             rutasActivas.forEach(r => {
                 const div = document.createElement('div'); div.className = "route-item route-warning";
-                div.innerHTML = `<strong>Chofer:</strong> ${r.chofer}<br><strong>Carga:</strong> ${r.paquete} (${r.producto})<br><strong>Zona:</strong> ${r.zona}`;
+                div.innerHTML = `<strong>Chofer:</strong> ${r.chofer}<br><strong>Carga:</strong> ${r.paquete}<br><strong>Zona:</strong> ${r.zona}`;
                 contenedor.appendChild(div);
             });
+        }
+
+        // INTERFAZ DEL CHOFER MÓVIL
+        function renderTablaChofer() {
+            const tbody = document.getElementById('tabla-chofer-body');
+            if(!tbody) return; tbody.innerHTML = "";
+
+            const rutasActuales = JSON.parse(localStorage.getItem('ALAS_RUTAS')) || [];
+            const enviosActuales = JSON.parse(localStorage.getItem('ALAS_ENVIOS')) || [];
+
+            // El chofer ve lo asignado y lo que marcó como entregado pero sigue bajo revisión
+            const misAsignaciones = enviosActuales.filter(e => 
+                rutasActuales.some(r => r.paquete === e.id && r.chofer === "Carlos Mendoza")
+            );
+
+            if(misAsignaciones.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:gray; padding:20px;">No tienes rutas asignadas para hoy.</td></tr>`;
+                return;
+            }
+
+            misAsignaciones.forEach(p => {
+                let celdaAccion = "";
+                
+                if (p.estado === "En Reparto") {
+                    celdaAccion = `<button class="btn-sm" style="background-color:#d97706;" onclick="choferNotificaEntrega('${p.id}')">🔔 Notificar Entrega</button>`;
+                } else if (p.estado === "Entregado por Chofer") {
+                    celdaAccion = `<span style="color:#b45309; font-weight:600; font-size:12px;">⏳ Esperando Cierre Admin</span>`;
+                } else {
+                    celdaAccion = `<span style="color:gray; font-size:12px;">Completado</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${p.id}</strong></td>
+                    <td>${p.cliente}</td>
+                    <td>${p.destino}</td>
+                    <td>${p.producto}</td>
+                    <td>${celdaAccion}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ACCIÓN DEL CHOFER: CAMBIA EL ESTADO SIN ELIMINAR EL REGISTRO DEL MAPA
+        function choferNotificaEntrega(id) {
+            const listado = JSON.parse(localStorage.getItem('ALAS_ENVIOS')) || [];
+            const paquete = listado.find(e => e.id === id);
+            if(paquete) {
+                paquete.estado = "Entregado por Chofer";
+                paquete.ubicacion = "El chofer reportó el paquete como entregado en el domicilio.";
+                localStorage.setItem('ALAS_ENVIOS', JSON.stringify(listado));
+                actualizarTodo();
+                alert(`👍 Notificación enviada. Queda en espera de la validación de la administración.`);
+            }
+        }
+
+        function toggleGPSChofer() {
+            const btn = document.getElementById('btn-gps');
+            const statusText = document.getElementById('status-gps');
+
+            if (watchID === null) {
+                if ("geolocation" in navigator) {
+                    btn.classList.add('btn-gps-active');
+                    document.getElementById('text-btn-gps').innerText = "Apagar Transmisión GPS";
+                    statusText.innerHTML = "Estado: 🟢 Transmitiendo coordenadas en vivo (Ruta Activa)";
+                    statusText.classList.add('gps-on');
+
+                    watchID = navigator.geolocation.watchPosition(
+                        (pos) => {
+                            const coordenadas = { lat: pos.coords.latitude, lng: pos.coords.longitude, activo: true };
+                            localStorage.setItem('ALAS_GPS_CARLOS', JSON.stringify(coordenadas));
+                            if (map) chequearYRenderizarMarcadorGPS();
+                        },
+                        (error) => { alert("No se pudo acceder al hardware de ubicación."); toggleGPSChofer(); },
+                        { enableHighAccuracy: true }
+                    );
+                } else { alert("Hardware de localización no compatible."); }
+            } else {
+                navigator.geolocation.clearWatch(watchID);
+                watchID = null;
+                btn.classList.remove('btn-gps-active');
+                document.getElementById('text-btn-gps').innerText = "Activar Mi Ubicación de Ruta";
+                statusText.innerHTML = "Estado: 🔴 GPS Desconectado";
+                statusText.classList.remove('gps-on');
+                localStorage.removeItem('ALAS_GPS_CARLOS');
+                if (choferMarker && map) { map.removeLayer(choferMarker); choferMarker = null; }
+            }
+        }
+
+        function chequearYRenderizarMarcadorGPS() {
+            const gpsData = JSON.parse(localStorage.getItem('ALAS_GPS_CARLOS'));
+            if (gpsData && gpsData.activo && map) {
+                if (choferMarker) { choferMarker.setLatLng([gpsData.lat, gpsData.lng]); }
+                else {
+                    choferMarker = L.marker([gpsData.lat, gpsData.lng]).addTo(map)
+                        .bindPopup("<b>Unidad En Calle:</b> Carlos Mendoza")
+                        .openPopup();
+                }
+                map.setView([gpsData.lat, gpsData.lng], 14);
+            }
         }
 
         function calcularReportes() {
             if(!document.getElementById('kpi-procesados')) return;
             const oficiales = envios.filter(e => e.estado !== "Pendiente de Aprobación");
             const total = oficiales.length;
-            const transit = oficiales.filter(e => e.estado === "En Tránsito" || e.estado === "En Reparto").length;
+            const transit = oficiales.filter(e => e.estado === "En Tránsito" || e.estado === "En Reparto" || e.estado === "Entregado por Chofer").length;
             const entregados = oficiales.filter(e => e.estado === "Entregado").length;
             document.getElementById('kpi-procesados').innerText = total;
             document.getElementById('kpi-transit').innerText = transit;
@@ -430,14 +563,6 @@
             } else { map.invalidateSize(); }
         }
 
-        function obtenerUbicacionActual() {
-            navigator.geolocation.watchPosition((pos) => {
-                if (choferMarker) choferMarker.setLatLng([pos.coords.latitude, pos.coords.longitude]);
-                else choferMarker = L.marker([pos.coords.latitude, pos.coords.longitude]).addTo(map);
-                map.setView([pos.coords.latitude, pos.coords.longitude], 15);
-            });
-        }
-
         function filtrarTabla() {
             const b = document.getElementById('input-busqueda').value.toLowerCase();
             document.querySelectorAll('#tabla-seguimiento-body tr').forEach(r => {
@@ -446,10 +571,13 @@
         }
 
         function actualizarTodo() {
+            envios = JSON.parse(localStorage.getItem('ALAS_ENVIOS')) || [];
+            rutasActivas = JSON.parse(localStorage.getItem('ALAS_RUTAS')) || [];
             renderPedidosWebPendientes();
             renderTablaSeguimiento();
             renderSelectRutas();
             renderRutasActivas();
+            renderTablaChofer();
             calcularReportes();
         }
     </script>
